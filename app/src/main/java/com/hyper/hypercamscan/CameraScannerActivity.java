@@ -12,7 +12,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
@@ -20,12 +19,13 @@ import com.scanlibrary.ScanActivity;
 import com.scanlibrary.ScanConstants;
 
 import java.io.IOException;
+import java.util.Objects;
 
-public class MainActivity extends AppCompatActivity {
+public class CameraScannerActivity extends AppCompatActivity {
 
     private static final int PERMISSIONS_REQUEST = 100;
     private static final int REQUEST_CODE = 99;
-    private static final String TAG = MainActivity.class.getCanonicalName();
+    private static final String TAG = CameraScannerActivity.class.getCanonicalName();
 
     private ImageView resultImageView;
     private Button takePictureButton;
@@ -47,14 +47,11 @@ public class MainActivity extends AppCompatActivity {
             takePictureButton.setText(getString(R.string.provide_permissions));
         }
 
-        takePictureButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (isPermissionGranted) {
-                    openCamera();
-                } else {
-                    requestForPermission();
-                }
+        takePictureButton.setOnClickListener(view -> {
+            if (isPermissionGranted) {
+                openCamera();
+            } else {
+                requestForPermission();
             }
         });
     }
@@ -69,11 +66,15 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            Uri uri = data.getExtras().getParcelable(ScanConstants.SCANNED_RESULT);
-            Bitmap bitmap = null;
+            Uri uri = Objects.requireNonNull(data.getExtras()).getParcelable(ScanConstants.SCANNED_RESULT);
+            Bitmap bitmap;
             try {
                 bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
-                getContentResolver().delete(uri, null, null);
+                if (uri != null) {
+                    // delete the image from phone
+                    getContentResolver().delete(uri, null, null);
+                }
+                resultImageView.setImageBitmap(bitmap);
             } catch (IOException e) {
                 e.printStackTrace();
             }

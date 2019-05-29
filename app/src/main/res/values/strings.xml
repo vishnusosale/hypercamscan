@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">HyperCamScan</string>
+    <string name="app_name">Hyper Camera Scan</string>
     <string name="title_permission">Please provide permissions</string>
     <string name="sub_title_permission">Sub title</string>
     <string name="take_picture">Take Picture</string>
