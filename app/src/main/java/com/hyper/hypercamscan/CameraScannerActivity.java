@@ -21,6 +21,9 @@ import com.scanlibrary.ScanConstants;
 import java.io.IOException;
 import java.util.Objects;
 
+/**
+ * MainActivity which helps users to capture images and view
+ */
 public class CameraScannerActivity extends AppCompatActivity {
 
     private static final int PERMISSIONS_REQUEST = 100;
@@ -56,6 +59,9 @@ public class CameraScannerActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Use the scanlibrary to open the Camera
+     */
     private void openCamera() {
         Intent intent = new Intent(this, ScanActivity.class);
         intent.putExtra(ScanConstants.OPEN_INTENT_PREFERENCE, ScanConstants.OPEN_CAMERA);
@@ -81,6 +87,11 @@ public class CameraScannerActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Check if permissions are provided by the user for camera, read and write external storage
+     *
+     * @return true if permission is granted
+     */
     private boolean checkLocationPermission() {
 
         return ContextCompat.checkSelfPermission(this,
@@ -91,6 +102,9 @@ public class CameraScannerActivity extends AppCompatActivity {
                         Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
     }
 
+    /**
+     * Request permission from user if not granted
+     */
     private void requestForPermission() {
         ActivityCompat.requestPermissions(this,
                 new String[]{
