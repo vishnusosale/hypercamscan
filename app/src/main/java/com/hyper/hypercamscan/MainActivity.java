@@ -8,10 +8,13 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
 
 import com.scanlibrary.ScanActivity;
 import com.scanlibrary.ScanConstants;
@@ -24,14 +27,36 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CODE = 99;
     private static final String TAG = MainActivity.class.getCanonicalName();
 
+    private ImageView resultImageView;
+    private Button takePictureButton;
+
+    private boolean isPermissionGranted;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        resultImageView = findViewById(R.id.result_image_view);
+        takePictureButton = findViewById(R.id.take_picture_button);
+
         if (checkLocationPermission()) {
-            openCamera();
+            isPermissionGranted = true;
+            takePictureButton.setText(getString(R.string.take_picture));
+        } else {
+            takePictureButton.setText(getString(R.string.provide_permissions));
         }
+
+        takePictureButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (isPermissionGranted) {
+                    openCamera();
+                } else {
+                    requestForPermission();
+                }
+            }
+        });
     }
 
     private void openCamera() {
@@ -57,58 +82,42 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean checkLocationPermission() {
 
-        if (ContextCompat.checkSelfPermission(this,
+        return ContextCompat.checkSelfPermission(this,
                 Manifest.permission.CAMERA) +
                 ContextCompat.checkSelfPermission(this,
                         Manifest.permission.READ_EXTERNAL_STORAGE) +
                 ContextCompat.checkSelfPermission(this,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
-                PackageManager.PERMISSION_GRANTED) {
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+    }
 
+    private void requestForPermission() {
+        ActivityCompat.requestPermissions(this,
+                new String[]{
+                        Manifest.permission.CAMERA,
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                PERMISSIONS_REQUEST);
+    }
 
-            if (ActivityCompat.shouldShowRequestPermissionRationale(
-                    this, Manifest.permission.CAMERA) ||
-                    ActivityCompat.shouldShowRequestPermissionRationale(
-                            this, Manifest.permission.READ_EXTERNAL_STORAGE) ||
-                    ActivityCompat.shouldShowRequestPermissionRationale(
-                            this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
 
+        if (requestCode == PERMISSIONS_REQUEST) {
+            if (grantResults.length > 0) {
+                boolean cameraPermission = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                boolean readExternalStorage = grantResults[1] == PackageManager.PERMISSION_GRANTED;
+                boolean writeExternalStorage = grantResults[2] == PackageManager.PERMISSION_GRANTED;
 
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-                new AlertDialog.Builder(this)
-                        .setTitle(R.string.title_permission)
-                        .setMessage(R.string.sub_title_permission)
-                        .setPositiveButton(R.string.ok, (dialogInterface, i) -> {
-
-
-                            //Prompt the user once explanation has been shown
-                            ActivityCompat.requestPermissions(MainActivity.this,
-                                    new String[]{
-                                            Manifest.permission.CAMERA,
-                                            Manifest.permission.READ_EXTERNAL_STORAGE,
-                                            Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                                    PERMISSIONS_REQUEST);
-                        })
-                        .create()
-                        .show();
-
-
-            } else {
-                // No explanation is required
-                ActivityCompat.requestPermissions(this,
-                        new String[]{
-                                Manifest.permission.CAMERA,
-                                Manifest.permission.READ_EXTERNAL_STORAGE,
-                                Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                        PERMISSIONS_REQUEST);
+                if (cameraPermission && readExternalStorage && writeExternalStorage) {
+                    // write your logic here
+                    isPermissionGranted = true;
+                    openCamera();
+                } else {
+                    isPermissionGranted = false;
+                    takePictureButton.setText(getString(R.string.provide_permissions));
+                }
             }
-
-            return false;
-
-        } else {
-            return true;
         }
     }
 }

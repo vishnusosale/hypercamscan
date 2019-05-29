@@ -2,4 +2,7 @@
     <string name="app_name">HyperCamScan</string>
     <string name="title_permission">Please provide permissions</string>
     <string name="sub_title_permission">Sub title</string>
+    <string name="take_picture">Take Picture</string>
+    <string name="provide_permissions">Provide permissions to continue</string>
+    <string name="captured_image">Captured Image</string>
 </resources>
